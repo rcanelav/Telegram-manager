@@ -4,11 +4,13 @@ import requests
 import json
 load_dotenv()
 
-def save_url(url):
-    print("Saving url: " + url)
+def save_url(data):
+    print("Saving url: " + data.text)
     endpoint = "https://api.notion.com/v1/pages"
-    database_id = getenv("NOTION_DATABASE_ID")
-    api_key = getenv("NOTION_INTEGRATION_TOKEN")
+    # database_id = getenv("NOTION_DATABASE_ID") 
+    # set database id if data.from_user.username == "rcanelav" use NOTION_DATABASE_ID if "AnitaPunetes" use ANTIA_DB"
+    database_id = getenv("NOTION_DATABASE_ID") if data.from_user.username == "rcanelav" else getenv("ANTIA_DB")
+    api_key = getenv("NOTION_INTEGRATION_TOKEN") if data.from_user.username == "rcanelav" else getenv("ANTIA_INTEGRATION_TOKEN")
     headers = {
         "Notion-Version": "2021-05-13",
         "Content-Type": "application/json",
@@ -31,14 +33,12 @@ def save_url(url):
         },
         "URL": {
             "type": "url",
-            "url": url
+            "url": data.text
         },
         "Categories": {
             "type": "multi_select",
             "multi_select": [
-                {
-                    "name": "Python"
-                }
+                
             ]
         }
     }
@@ -55,5 +55,5 @@ def save_url(url):
     # Make the API request
     response = requests.post(endpoint, headers=headers, data=payload_str)
 
-    print(response.json().get("id"))
+    # print(response.json().get("id"))
     return response.json()

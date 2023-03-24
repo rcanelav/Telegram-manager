@@ -6,11 +6,12 @@ from services.notion.find_database_categories import find_database_categories
 from services.notion.save_new_url import save_url
 from services.notion.set_item_categories import set_item_categories
 from utils.white_list import white_list
+import requests
 load_dotenv()
 
 bot_token = getenv("BOT_TOKEN")
 bot = telebot.TeleBot(bot_token)
-categories = find_database_categories()
+categories = None
 selected_categories = {}
 
 @bot.message_handler(commands=['start', 'help', 'ayuda'])
@@ -28,7 +29,9 @@ def bot_mensajes_texto(message):
     if "https://" in message.text:
         # get the title from the previsually extracted url  save in in the global variable created_item
         global created_item
-        created_item = save_url(message.text)
+        global categories
+        categories = find_database_categories(message)
+        created_item = save_url(message)
      
         markup = telebot.types.InlineKeyboardMarkup(row_width=1)
         for option in categories:
@@ -76,8 +79,8 @@ def process_callback(call):
                 new_category = {"name": selected_category}
                 categories.append(new_category)
                 data_structure.append(new_category)
-
-        set_item_categories(created_item, data_structure)
+        username = call.message.from_user.username
+        set_item_categories(created_item, data_structure, username)
     elif call.data.lower() == "agregar":
         print("call.data: ", call.data)
 
@@ -112,3 +115,7 @@ if __name__ == '__main__':
     # bot_listener.start()
     start_bot()
     # find_database_categories();
+
+
+
+
